@@ -29,7 +29,7 @@ export const authOptions: NextAuthOptions = {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         session.user.courses = (user as any).courses;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        session.user.major = (user as any).major;
+        session.user.majorId = (user as any).majorId;
       }
       return session;
     },

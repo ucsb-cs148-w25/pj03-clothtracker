@@ -1,13 +1,15 @@
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "../auth/[...nextauth]"
 import { prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { UserCourses } from "@/types/next-auth"
 
 type ResponseData = {
   error?: string
   user?: {
     id: string
-    major: string | null
+    majorId: number | null
   }
 }
 
@@ -25,10 +27,10 @@ export default async function handler(
     return res.status(401).json({ error: "Not authenticated" })
   }
 
-  const { major, firstQuarter } = req.body
+  const { majorId, firstQuarter } = req.body
 
-  if (!major || typeof major !== 'string') {
-    return res.status(400).json({ error: "Major is required and must be a string" })
+  if (typeof majorId !== 'number') {
+    return res.status(400).json({ error: "Major ID is required and must be a number" })
   }
 
   if (!firstQuarter || typeof firstQuarter !== 'string' || !/^\d{5}$/.test(firstQuarter)) {
@@ -36,18 +38,40 @@ export default async function handler(
   }
 
   try {
+    // Verify the major exists
+    const majorExists = await prisma.major.findUnique({
+      where: { id: majorId }
+    });
+
+    if (!majorExists) {
+      return res.status(400).json({ error: "Invalid major ID" });
+    }
+
+    // First get the current user to preserve their courses
+    const currentUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { courses: true }
+    });
+
+    if (!currentUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Parse the existing courses JSON and validate its structure
+    const coursesData = currentUser.courses as unknown as UserCourses;
+    
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: { 
-        major,
+        majorId,
         courses: {
           firstQuarter,
-          courses: []
-        }
+          courses: coursesData.courses
+        } as unknown as Prisma.JsonObject
       },
       select: {
         id: true,
-        major: true
+        majorId: true
       }
     })
     res.json({ user: updatedUser })

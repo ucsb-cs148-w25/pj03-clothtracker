@@ -1,6 +1,6 @@
 ## What is this
 This is the root directory for the next.js webapp GauchoGraduate.
-Because the project is built on typescript, all code changes should run the typescript compiler to ensure they did not break any type rules.
+Because the project is built on typescript, all code changes should run the typescript compiler to ensure they did not break any type rules. They should also run `npm run lint`
 
 The idea of a project is as follows: A user (UCSB Student) logs in and provides their Major. The Webapp then shows them their graduation requirements in a progress bar component on the right of the screen.
 

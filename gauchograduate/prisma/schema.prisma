@@ -39,7 +39,8 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
-  major         String    @default("")
+  majorId       Int?      
+  major         Major?    @relation(fields: [majorId], references: [id])
   dateJoined    DateTime  @default(now())
   courses       Json      @default("{\"firstQuarter\": \"20224\", \"courses\": []}")
   accounts      Account[]
@@ -73,4 +74,12 @@ model Offering {
   year     String
   courseId Int
   course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model Major {
+  id           Int      @id @default(autoincrement())
+  name         String
+  college      String
+  requirements Json     // Array of course IDs
+  users        User[]
 }

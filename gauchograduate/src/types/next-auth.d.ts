@@ -18,7 +18,7 @@ declare module "next-auth" {
       email: string;
       name?: string | null;
       image?: string | null;
-      major: string;
+      majorId: number | null;
       courses: UserCourses;
     }
   }
